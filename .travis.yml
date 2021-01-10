@@ -1,0 +1,27 @@
+language: generic
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker build -t y2gcoder/react-test-app -f ./frontend/Dockerfile.dev ./frontend
+
+script: 
+  - docker run -e CI=true y2gcoder/react-test-app npm run test
+
+after_success: 
+  - docker build -t y2gcoder/docker-frontend ./frontend
+  - docker build -t y2gcoder/docker-backend ./backend
+  - docker build -t y2gcoder/docker-nginx ./nginx
+
+  - echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_ID" --password-stdin
+
+  - docker push y2gcoder/docker-frontend
+  - docker push y2gcoder/docker-backend
+  - docker push y2gcoder/docker-nginx
+
+
+
+
